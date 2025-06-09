@@ -49,7 +49,7 @@ const StatsCards = ({ totalActivities, activeApps, campusesCount, avgUsage }) =>
         </div>
       </CardContent>
     </Card>
-
+{/* 
     <Card className="border-orange-200">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
@@ -62,7 +62,7 @@ const StatsCards = ({ totalActivities, activeApps, campusesCount, avgUsage }) =>
           </div>
         </div>
       </CardContent>
-    </Card>
+    </Card> */}
   </div>
 );
 

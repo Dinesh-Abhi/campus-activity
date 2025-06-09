@@ -18,16 +18,11 @@ import {
   User,
   UserCheck,
 } from "lucide-react";
+import MainConstants from "@/components/constants/MainConstants";
 
-const campuses = ["KMIT", "NGIT/KMEC", "KMCE"];
-const apps = [
-  "TESSELLATOR",
-  "TOOFAAN",
-  "BETAAL",
-  "PRASHNAMANCH",
-  "TANTRIK",
-  "TESSERACT",
-];
+const campuses = Object.values(MainConstants.COLLEGES);
+const apps = MainConstants.APPORDER;
+
 const users = ["USER 1", "USER 2"];
 
 // Icon mapping for apps
@@ -48,6 +43,8 @@ const getCampusIcon = (campusName) => {
   const iconMap = {
     KMIT: <School size={16} />,
     "NGIT/KMEC": <School size={16} />,
+    NGIT: <School size={16} />,
+    KMEC: <School size={16} />,
     KMCE: <School size={16} />,
   };
   return iconMap[campusName] || <GraduationCap size={16} />;
@@ -92,6 +89,9 @@ const Sidebar = ({ collapsed, isOpen, onClose }) => {
                 to: "/reports",
               },
               { label: "Export", icon: <Download size={16} />, to: "/export" },
+              {
+                label: "Settings",icon: <Settings size={16} />,to: "/dbconfig",
+              },
             ]}
             collapsed={collapsed}
             onClose={onClose}

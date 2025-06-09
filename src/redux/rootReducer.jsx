@@ -1,18 +1,18 @@
 // redux/rootReducer.ts
 import { combineReducers } from "@reduxjs/toolkit";
 import {
-  getDrugModalitiesReducer,
-  postDrugModalitiesReducer,
-  updateDrugModalitiesReducer,
-} from "./drugmodailities/reducers";
-
+  getSanchitDashboardChartsReducer,
+  getSanchitTableReducer,
+} from "./dashboard/reducers";
+import { getCampusAppsUsageReducer } from "./college/reducers";
 
 const rootReducers = combineReducers({
   // drugmodalities reducers
-  getDrugModalitiesReducerRes: getDrugModalitiesReducer,
-  getSanchitTableReducerRes: postDrugModalitiesReducer,
-  updateDrugModalitiesReducerRes: updateDrugModalitiesReducer,
+  getSanchitDashboardChartsRes: getSanchitDashboardChartsReducer,
+  getSanchitTableReducerRes: getSanchitTableReducer,
 
+  //campus app usage reducers
+  getCampusAppUsageReducerRes: getCampusAppsUsageReducer,
   
 });
 

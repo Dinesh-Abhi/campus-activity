@@ -50,7 +50,7 @@ import {
 } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { GetSanchithData } from "@/redux/drugmodailities/actionCreator";
+import { GetSanchithData } from "@/redux/dashboard/actionCreator";
 
 const APPS = [
   "TESSELLATOR",
@@ -163,8 +163,8 @@ const Index = () => {
     dispatch(GetSanchithData());
   }, [dispatch]);
   const { GetSanchithDatares, SanchithDataLoading } = useSelector((state) => ({
-    GetSanchithDatares: state.getDrugModalitiesReducerRes.data,
-    SanchithDataLoading: state.getDrugModalitiesReducerRes.loading,
+    GetSanchithDatares: state.getSanchitDashboardChartsRes.data,
+    SanchithDataLoading: state.getSanchitDashboardChartsRes.loading,
   }));
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(
@@ -374,7 +374,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Campus Analytics Dashboard
+                  Sanchit
                 </h1>
                 <p className="text-orange-600">
                   Monitor app activities across campuses

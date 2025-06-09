@@ -19,7 +19,7 @@ const HeaderSection = ({
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Campus Analytics Dashboard
+              Sanchit
             </h1>
             <p className="text-orange-600">Monitor app activities across campuses</p>
           </div>

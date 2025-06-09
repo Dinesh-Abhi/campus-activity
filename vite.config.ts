@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const port = Number(env.VITE_APP_WEBSITE_PORT) || 5000;
+  const port = Number(env.VITE_APP_WEBSITE_PORT);
   return {
     server: {
       host: "::",
