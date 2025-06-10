@@ -10,7 +10,8 @@ const MainLayout = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
+      // Close overlay on medium and up
+      if (window.innerWidth >= 768) {
         setSidebarOpen(false);
       }
     };
@@ -19,9 +20,11 @@ const MainLayout = () => {
   }, []);
 
   const toggleSidebar = () => {
-    if (window.innerWidth >= 1024) {
+    if (window.innerWidth >= 768) {
+      // For medium screens and up, collapse/expand
       setCollapsed((prev) => !prev);
     } else {
+      // For small screens, toggle overlay
       setSidebarOpen((prev) => !prev);
     }
   };
@@ -35,9 +38,13 @@ const MainLayout = () => {
 
       {/* Body */}
       <div className="flex flex-1 min-h-0 w-full relative">
-        <Sidebar collapsed={collapsed} isOpen={sidebarOpen} onClose={closeSidebar} />
+        <Sidebar
+          collapsed={collapsed}
+          isOpen={sidebarOpen}
+          onClose={closeSidebar}
+        />
         <main className="flex-1 min-h-0 overflow-auto">
-            <Outlet />
+          <Outlet />
         </main>
       </div>
 

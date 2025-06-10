@@ -9,7 +9,7 @@ const Dashboard = lazy(() => import("../pages/Dashboard/index"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const Report = lazy(() => import("../pages/Reports/Reports"));
 const Monthly = lazy(() => import("../pages/Dashboard/week/Monthly"));
-const Campus = lazy(() => import("../pages/Campus/index"));
+const Campus = lazy(() => import("../pages/Campus/Index"));
 const Settings = lazy(() => import("../pages/Settings"));
 
 const campusRouteNames = Object.values(MainConstants.COLLEGES).map((c) =>

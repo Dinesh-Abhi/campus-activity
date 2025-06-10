@@ -3,22 +3,27 @@ import actions from "./actions";
 import Cookies from 'js-cookie';
 
 const {
-
   // getCampusAppUsageData
   getCampusAppUsageDataBegin,
   getCampusAppUsageDataSuccess,
   getCampusAppUsageDataErr,
-
-
 } = actions;
 
-// Fetching Sanchith Dashboard Data for charts
+// Fetching Campus App Usage Data
 const GetCampusAppsUsageData = (collegecode) => {
   return async (dispatch) => {
     try {
       await dispatch(getCampusAppUsageDataBegin());
-      const dbconfig = Cookies.get("dbconfig") || "sanchit";  // Default to 'sanchit'
-      const response = await DataService.get(`collegewisetoolsessions.php?college=${collegecode.toUpperCase()}&env=${dbconfig}`);
+      const dbconfig = Cookies.get("dbconfig");  // Get dbconfig (or undefined if it doesn't exist)
+
+      // Conditionally create the URL based on dbconfig
+      let url = `collegewisetoolsessions.php?college=${collegecode.toUpperCase()}`;
+      if (dbconfig) {
+        url += `&env=${dbconfig}`;
+      }
+
+      const response = await DataService.get(url);
+
       if (response && response.status === 200 && response.data !== null) {
         await dispatch(getCampusAppUsageDataSuccess(response.data));
       } else if (response && response.status === 200 && response.data === null) {
@@ -34,9 +39,6 @@ const GetCampusAppsUsageData = (collegecode) => {
   };
 };
 
-
-
 export {
   GetCampusAppsUsageData,
 };
-

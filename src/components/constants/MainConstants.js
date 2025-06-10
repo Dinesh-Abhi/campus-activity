@@ -12,8 +12,8 @@ const APPORDER = [
 const COLLEGES = {
   KMIT: "KMIT",
   NGIT: "NGIT",
-  KMCE: "KMCE",
-  KMEC: "KMEC"
+  KMEC: "KMEC",
+  KMCE: "KMCE"
 };
 
 

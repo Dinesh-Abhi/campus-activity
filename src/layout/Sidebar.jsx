@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -19,6 +19,8 @@ import {
   UserCheck,
 } from "lucide-react";
 import MainConstants from "@/components/constants/MainConstants";
+import { useDispatch, useSelector } from "react-redux";
+import { GetAllCampusAppsData } from "@/redux/dashboard/actionCreator";
 
 const campuses = Object.values(MainConstants.COLLEGES);
 const apps = MainConstants.APPORDER;
@@ -50,7 +52,64 @@ const getCampusIcon = (campusName) => {
   return iconMap[campusName] || <GraduationCap size={16} />;
 };
 
+// Skeleton component for loading states
+const SkeletonItem = ({ collapsed }) => (
+  <li className={`${collapsed ? "px-1" : "px-2"} py-2`}>
+    <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
+      <div className="w-4 h-4 bg-gray-200 rounded animate-pulse flex-shrink-0" />
+      {!collapsed && <div className="h-4 bg-gray-200 rounded animate-pulse flex-1" />}
+    </div>
+  </li>
+);
+
+const SectionSkeleton = ({ title, itemCount = 3, collapsed }) => (
+  <div className={`${collapsed ? "px-1 py-2" : "px-3 py-2"}`}>
+    {title && !collapsed && (
+      <div className="h-3 bg-gray-200 rounded animate-pulse mb-2 w-16" />
+    )}
+    <ul className="space-y-0.5">
+      {Array.from({ length: itemCount }).map((_, index) => (
+        <SkeletonItem key={index} collapsed={collapsed} />
+      ))}
+    </ul>
+  </div>
+);
+
+// Helper function to order items based on MainConstants order
+const getOrderedItems = (items, orderArray, keyField = 'name') => {
+  if (!items || !orderArray) return [];
+
+  return orderArray
+    .map(orderItem => items.find(item => item[keyField] === orderItem))
+    .filter(Boolean); // Remove undefined items
+};
+
 const Sidebar = ({ collapsed, isOpen, onClose }) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(GetAllCampusAppsData());
+  }, [dispatch]);
+
+  const {
+    getCampusAppListData,
+    getCampusAppListLoading,
+  } = useSelector((state) => ({
+    getCampusAppListData: state.getAllSidebarDataReducerRes.data,
+    getCampusAppListLoading: state.getAllSidebarDataReducerRes.loading,
+  }));
+
+  // Order campus and apps based on MainConstants
+  const orderedCampuses = getOrderedItems(
+    getCampusAppListData?.colleges,
+    campuses
+  );
+
+  const orderedApps = getOrderedItems(
+    getCampusAppListData?.tools,
+    apps
+  );
+
   return (
     <>
       {/* Mobile overlay */}
@@ -68,10 +127,9 @@ const Sidebar = ({ collapsed, isOpen, onClose }) => {
           flex flex-col bg-white/80 backdrop-blur-xl border-r border-gray-200/60
           transition-all duration-300 ease-in-out
           ${collapsed ? "md:w-14" : "md:w-60"}
-          ${
-            isOpen
-              ? "w-60 translate-x-0"
-              : "w-60 -translate-x-full md:translate-x-0"
+          ${isOpen
+            ? "w-60 translate-x-0"
+            : "w-60 -translate-x-full md:translate-x-0"
           }
         `}
         style={{ height: "auto", minHeight: "100%" }}
@@ -90,7 +148,7 @@ const Sidebar = ({ collapsed, isOpen, onClose }) => {
               },
               { label: "Export", icon: <Download size={16} />, to: "/export" },
               {
-                label: "Settings",icon: <Settings size={16} />,to: "/dbconfig",
+                label: "Settings", icon: <Settings size={16} />, to: "/dbconfig",
               },
             ]}
             collapsed={collapsed}
@@ -98,29 +156,45 @@ const Sidebar = ({ collapsed, isOpen, onClose }) => {
           />
 
           {/* Campus */}
-          <Section
-            title={!collapsed ? "Campus" : null}
-            items={campuses.map((campus) => ({
-              label: campus,
-              icon: getCampusIcon(campus),
-              to: `/campus/${campus.toLowerCase().replace(/\s/g, "")}`,
-            }))}
-            collapsed={collapsed}
-            onClose={onClose}
-            defaultIcon={<School size={16} />} // <-- Shared icon here
-          />
+          {getCampusAppListLoading ? (
+            <SectionSkeleton
+              title={!collapsed ? "Campus" : null}
+              itemCount={campuses.length}
+              collapsed={collapsed}
+            />
+          ) : (
+            <Section
+              title={!collapsed ? "Campus" : null}
+              items={orderedCampuses?.map((campus) => ({
+                label: campus.name,
+                icon: getCampusIcon(campus.name),
+                to: `/campus/${campus.name.toLowerCase().replace(/\s/g, "")}`,
+              }))}
+              collapsed={collapsed}
+              onClose={onClose}
+              defaultIcon={<School size={16} />}
+            />
+          )}
 
           {/* Apps */}
-          <Section
-            title={!collapsed ? "Apps" : null}
-            items={apps.map((app) => ({
-              label: app,
-              icon: getAppIcon(app),
-              to: `/apps/${app.toLowerCase()}`,
-            }))}
-            collapsed={collapsed}
-            onClose={onClose}
-          />
+          {getCampusAppListLoading ? (
+            <SectionSkeleton
+              title={!collapsed ? "Apps" : null}
+              itemCount={apps.length}
+              collapsed={collapsed}
+            />
+          ) : (
+            <Section
+              title={!collapsed ? "Apps" : null}
+              items={orderedApps?.map((app) => ({
+                label: app.name,
+                icon: getAppIcon(app.name),
+                to: `/apps/${app.name.toLowerCase()}`,
+              }))}
+              collapsed={collapsed}
+              onClose={onClose}
+            />
+          )}
 
           {/* Users */}
           <Section
@@ -154,16 +228,15 @@ const Section = ({ title, items, collapsed, onClose, defaultIcon }) => {
         </h3>
       )}
       <ul className="space-y-0.5">
-        {items.map(({ label, icon, to }) => (
+        {items?.map(({ label, icon, to }) => (
           <li key={label}>
             <NavLink
               to={to}
               onClick={handleLinkClick}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100 text-gray-700 ${
-                  isActive
-                    ? "bg-orange-50 text-orange-700 border-r-2 border-orange-600"
-                    : "hover:text-gray-900"
+                `group flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100 text-gray-700 ${isActive
+                  ? "bg-orange-50 text-orange-700 border-r-2 border-orange-600"
+                  : "hover:text-gray-900"
                 } ${collapsed ? "justify-center" : ""}`
               }
               title={collapsed ? label : ""}

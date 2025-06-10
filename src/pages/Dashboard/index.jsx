@@ -1,6 +1,7 @@
 // src/pages/Index.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import StatsCards from "./StatsCards";
+import MobileStatsCards from "./MobileStatsCards";
 import ActivitiesByCampusChart from "./ActivitiesByCampusChart";
 import AppUsagePieChart from "./AppUsagePieChart";
 import AppCampusComparisonBarChart from "@/pages/Dashboard/AppCampusComparisonBarChart";
@@ -11,7 +12,6 @@ import {
   GetSanchithData,
   SanchitDashboardTableData,
 } from "@/redux/dashboard/actionCreator";
-import MobileStatsCards from "./MobileStatsCards";
 import Main from "@/components/custom/Main";
 
 const DATE_PRESETS = [
@@ -150,8 +150,8 @@ const Index = () => {
   }, [GetSanchithDatares]);
 
   const activities = useMemo(() => {
-    if (!tableSanchitData) return [];
-    return tableSanchitData?.map((item) => ({
+    if (!tableSanchitData || !Array.isArray(tableSanchitData)) return [];
+    return tableSanchitData.map((item) => ({
       id: item.id,
       app: item.app,
       campus: item.campus,
@@ -223,9 +223,11 @@ const Index = () => {
   }, [GetSanchithDatares]);
 
   return (
-    <Main>
-      {/* Header Cards - visible always */}
-      {/* <MobileStatsCards
+    <div className={`min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 relative overflow-hidden`}>
+      <div className="relative z-10 max-w-8xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-2">
+
+        {/* Header Cards - visible always */}
+        {/* <MobileStatsCards
         totalActivities={GetSanchithDatares?.summary?.total_sessions ?? 0}
         activeApps={GetSanchithDatares?.summary?.active_apps ?? 0}
         campusesCount={
@@ -233,8 +235,8 @@ const Index = () => {
             ? Object.keys(GetSanchithDatares.sessions).length
             : 0
         }
-      /> */}
-      {/* <div className="hidden sm:block">
+      />
+      <div className="hidden sm:block">
         <StatsCards
           totalActivities={GetSanchithDatares?.summary?.total_sessions ?? 0}
           activeApps={GetSanchithDatares?.summary?.active_apps ?? 0}
@@ -247,81 +249,104 @@ const Index = () => {
         />
       </div> */}
 
-      {/* Tabs */}
-      <div className="mt-6 mb-6 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-4">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              className={`px-4 py-2 text-base font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-gray-500 hover:text-orange-600"
-              }`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+        {/* Tabs */}
+        {/* Mobile-friendly Tabs */}
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile: Horizontal scrollable tabs */}
+          <div className="sm:hidden border-b border-gray-200">
+            <nav className="-mb-px flex space-x-2 overflow-x-auto scrollbar-hide px-2">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
+                    ? "border-orange-500 text-orange-600"
+                    : "border-transparent text-gray-500 hover:text-orange-600"
+                    }`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Desktop: Regular tabs */}
+          <div className="hidden sm:block border-b border-gray-200">
+            <nav className="-mb-px flex space-x-4">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={`px-4 py-2 text-base font-medium border-b-2 transition-colors ${activeTab === tab.key
+                    ? "border-orange-500 text-orange-600"
+                    : "border-transparent text-gray-500 hover:text-orange-600"
+                    }`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+
+        {/* Tab Content */}
+        <div className="px-1 sm:px-0">
+          {activeTab === "apps" && (
+            <div>
+              {SanchithDataLoading ? (
+                <ChartSkeleton />
+              ) : (
+                <AppCampusComparisonBarChart
+                  data={
+                    selectedRange === "today"
+                      ? transformedComparisonData
+                      : stackedChartData
+                  }
+                  campusKeys={CAMPUS_KEYS}
+                  datePresets={DATE_PRESETS}
+                  selectedRange={selectedRange}
+                  onRangeChange={(newRange) => {
+                    setSelectedRange(newRange);
+                    setCurrentPage(1);
+                  }}
+                  chartType={selectedRange === "today" ? "grouped" : "stacked"}
+                />
+              )}
+            </div>
+          )}
+          {activeTab === "activities" && (
+            <div className="sm:text-xs p-2 sm:p-1 max-h-[80vh] overflow-y-auto">
+              {tableSanchitDataLoading ? (
+                <TableSkeleton />
+              ) : (
+                <ActivitiesTable
+                  tableRange={tableRange}
+                  setTableRange={setTableRange}
+                  filteredActivities={filteredActivities}
+                  paginatedActivities={paginatedActivities}
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  clearFilters={clearFilters}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  selectedUser={selectedUser}
+                  setSelectedUser={setSelectedUser}
+                  uniqueUsers={uniqueUsers}
+                  selectedApp={selectedApp}
+                  setSelectedApp={setSelectedApp}
+                  selectedCampus={selectedCampus}
+                  setSelectedCampus={setSelectedCampus}
+                />
+              )}
+            </div>
+          )}
+          {activeTab === "faculty" && <ComingSoon label="Faculty" />}
+          {activeTab === "reports" && <ComingSoon label="Reports" />}
+        </div>
       </div>
-
-      {/* Tab Content */}
-      {activeTab === "apps" && (
-        <div>
-          {SanchithDataLoading ? (
-            <ChartSkeleton />
-          ) : (
-            <AppCampusComparisonBarChart
-              data={
-                selectedRange === "today"
-                  ? transformedComparisonData
-                  : stackedChartData
-              }
-              campusKeys={CAMPUS_KEYS}
-              datePresets={DATE_PRESETS}
-              selectedRange={selectedRange}
-              onRangeChange={(newRange) => {
-                setSelectedRange(newRange);
-                setCurrentPage(1);
-              }}
-              chartType={selectedRange === "today" ? "grouped" : "stacked"}
-            />
-          )}
-        </div>
-      )}
-
-      {activeTab === "activities" && (
-        <div>
-          {tableSanchitDataLoading ? (
-            <TableSkeleton />
-          ) : (
-            <ActivitiesTable
-              tableRange={tableRange}
-              setTableRange={setTableRange}
-              filteredActivities={filteredActivities}
-              paginatedActivities={paginatedActivities}
-              totalPages={totalPages}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              clearFilters={clearFilters}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
-              uniqueUsers={uniqueUsers}
-              selectedApp={selectedApp}
-              setSelectedApp={setSelectedApp}
-              selectedCampus={selectedCampus}
-              setSelectedCampus={setSelectedCampus}
-            />
-          )}
-        </div>
-      )}
-
-      {activeTab === "faculty" && <ComingSoon label="Faculty" />}
-      {activeTab === "reports" && <ComingSoon label="Reports" />}
-    </Main>
+    </div>
   );
 };
 

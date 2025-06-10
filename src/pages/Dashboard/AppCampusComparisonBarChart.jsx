@@ -71,7 +71,7 @@ const AppCampusComparisonBarChart = ({
   campusKeys,
   datePresets = [],
   selectedRange = "today",
-  onRangeChange = () => {},
+  onRangeChange = () => { },
   chartType = "stacked",
 }) => {
   const [activeKeys, setActiveKeys] = React.useState(campusKeys);
@@ -79,16 +79,16 @@ const AppCampusComparisonBarChart = ({
   const orderedData =
     chartType === "grouped"
       ? APPORDER.map((appName) => {
-          const found = data.find((row) => row.app === appName);
-          if (found) {
-            return { ...found };
-          } else {
-            return {
-              app: appName,
-              ...Object.fromEntries(campusKeys.map((ck) => [ck, 0])),
-            };
-          }
-        })
+        const found = data.find((row) => row.app === appName);
+        if (found) {
+          return { ...found };
+        } else {
+          return {
+            app: appName,
+            ...Object.fromEntries(campusKeys.map((ck) => [ck, 0])),
+          };
+        }
+      })
       : [];
 
   const groupedWithTotals = orderedData.map((entry) => {
@@ -118,6 +118,36 @@ const AppCampusComparisonBarChart = ({
     chartData.some((entry) => entry[key] > 0)
   );
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          style={{
+            backgroundColor: "#FFFFc0", // very light yellow
+            border: ".5px solid darkorange",
+            padding: "8px",
+            borderRadius: "5px",
+          }}
+        >
+          <p style={{ margin: 0, fontWeight: "bold" }}>{label}</p>
+          {payload.map((entry) => (
+            <p
+              key={entry.dataKey}
+              style={{
+                margin: 0,
+                fontWeight: "bold",
+                fontSize: "15px",
+                color: entry.fill,
+              }}
+            >
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
   return (
     <Card className="border-amber-200 overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-amber-100 to-orange-100 pb-4">
@@ -153,21 +183,21 @@ const AppCampusComparisonBarChart = ({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 lg:p-0">
-        <div className="flex justify-end px-6 pb-2 pt-4">
-          <div className="flex space-x-2">
+      <CardContent className="p-0">
+        {/* Button Row */}
+        <div className="flex justify-end px-2 sm:px-4 md:px-6 pb-2 pt-4">
+          <div className="flex flex-wrap gap-2">
             {datePresets.map((preset) => (
               <button
                 key={preset.value}
                 onClick={() => onRangeChange(preset.value)}
                 className={`
-                  px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
-                  ${
-                    selectedRange === preset.value
-                      ? "bg-amber-600 text-white shadow-md transform scale-105"
-                      : "bg-white/70 text-amber-700 hover:bg-white hover:shadow-sm border border-amber-300"
+            px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200
+            ${selectedRange === preset.value
+                    ? "bg-amber-600 text-white shadow-md scale-105"
+                    : "bg-white/70 text-amber-700 hover:bg-white hover:shadow-sm border border-amber-300"
                   }
-                `}
+          `}
               >
                 {preset.label}
               </button>
@@ -175,37 +205,16 @@ const AppCampusComparisonBarChart = ({
           </div>
         </div>
 
+        {/* Chart Section */}
         {chartData && chartData.length > 0 ? (
-          <>
-            {/* <div className="px-6 pt-6">
-              <div className="flex space-x-2">
-                {datePresets.map((preset) => (
-                  <button
-                    key={preset.value}
-                    onClick={() => onRangeChange(preset.value)}
-                    className={`
-                      px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
-                      ${
-                        selectedRange === preset.value
-                          ? "bg-amber-600 text-white shadow-md transform scale-105"
-                          : "bg-white/70 text-amber-700 hover:bg-white hover:shadow-sm border border-amber-300"
-                      }
-                    `}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div> */}
-
-            <div style={{ padding: "20px" }}>
-              <ResponsiveContainer width="100%" height={400}>
+          <div className="px-2 sm:px-4 md:px-6 pb-4 pt-0">
+            <div className="w-full h-[260px] xs:h-[320px] sm:h-[360px] md:h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartData}
-                  margin={{ top: 40, right: 30, left: 30, bottom: 40 }}
+                  margin={{ top: 24, right: 12, left: 6, bottom: 24 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-
                   <XAxis
                     dataKey={chartType === "grouped" ? "app" : "day"}
                     stroke="#666"
@@ -213,9 +222,9 @@ const AppCampusComparisonBarChart = ({
                     label={{
                       value: chartType === "grouped" ? "Apps" : "Day",
                       position: "insideBottom",
-                      offset: -15,
+                      offset: -10,
                       fill: "#666",
-                      fontSize: 11,
+                      fontSize: 10,
                     }}
                   />
                   <YAxis
@@ -226,12 +235,11 @@ const AppCampusComparisonBarChart = ({
                       position: "insideLeft",
                       offset: 10,
                       fill: "#666",
-                      fontSize: 12,
+                      fontSize: 11,
                     }}
                     stroke="#666"
                     allowDecimals={false}
                   />
-
                   <Legend
                     verticalAlign="bottom"
                     align="center"
@@ -244,14 +252,11 @@ const AppCampusComparisonBarChart = ({
                     }}
                     onClick={handleLegendClick}
                   />
-
-                  <Tooltip />
-
+                  <Tooltip content={<CustomTooltip />} />
                   {activeKeys.map((campusKey) => {
                     const isLastActive =
                       chartType === "stacked" &&
                       campusKey === activeKeys[activeKeys.length - 1];
-
                     return (
                       <Bar
                         key={campusKey}
@@ -261,22 +266,13 @@ const AppCampusComparisonBarChart = ({
                         stackId={chartType === "stacked" ? "a" : undefined}
                         shape={(props) => <CustomBar {...props} />}
                         activeBar={<Rectangle stroke="tomato" />}
-
                       >
                         {chartType === "grouped" && (
-                          <LabelList
-                            dataKey={campusKey}
-                            content={<ConditionalLabel />}
-                          />
+                          <LabelList dataKey={campusKey} content={<ConditionalLabel />} />
                         )}
-
                         {chartType === "stacked" && (
-                          <LabelList
-                            dataKey={campusKey}
-                            content={<LabelInsideStacked />}
-                          />
+                          <LabelList dataKey={campusKey} content={<LabelInsideStacked />} />
                         )}
-
                         {isLastActive && (
                           <LabelList
                             content={({ x, y, width, value }) => {
@@ -298,10 +294,10 @@ const AppCampusComparisonBarChart = ({
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex items-center justify-center h-[280px] lg:h-[400px] border border-dashed border-amber-300 bg-amber-50 rounded-lg">
-            <div className="text-center">
+          <div className="flex items-center justify-center h-[200px] xs:h-[260px] sm:h-[300px] md:h-[400px] border border-dashed border-amber-300 bg-amber-50 rounded-lg">
+            <div className="text-center px-4">
               <div className="text-amber-600 font-medium mb-2">
                 No data available
               </div>
